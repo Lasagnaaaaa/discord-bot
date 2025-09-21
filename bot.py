@@ -4,8 +4,9 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-# Carica variabili dal file .env o da Render
+# Carica variabili da .env (solo in locale)
 load_dotenv()
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
@@ -14,6 +15,7 @@ intents.message_content = True
 
 class MyClient(discord.Client):
     async def setup_hook(self):
+        # Avvio il task periodico quando il bot è pronto
         self.bg_task = asyncio.create_task(self.check_updates())
 
     async def on_ready(self):
@@ -67,13 +69,12 @@ class MyClient(discord.Client):
 
             last_values = current_values
 
+    async def on_message(self, message):
+        if message.author == self.user:
+            return
+        if message.content.lower() == "!ciao":
+            await message.channel.send("Ciao! Sto monitorando tutte le value 🔍")
+
+# Avvio del bot
 client = MyClient(intents=intents)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content.lower() == "!ciao":
-        await message.channel.send("Ciao! Sto monitorando tutte le value 🔍")
-
 client.run(TOKEN)
