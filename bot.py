@@ -3,6 +3,7 @@ import requests
 import asyncio
 import os
 from dotenv import load_dotenv
+from keep_alive import keep_alive  # Importa il mini webserver
 
 # Carica variabili da .env (solo in locale)
 load_dotenv()
@@ -15,7 +16,6 @@ intents.message_content = True
 
 class MyClient(discord.Client):
     async def setup_hook(self):
-        # Avvio il task periodico quando il bot è pronto
         self.bg_task = asyncio.create_task(self.check_updates())
 
     async def on_ready(self):
@@ -75,6 +75,9 @@ class MyClient(discord.Client):
         if message.content.lower() == "!ciao":
             await message.channel.send("Ciao! Sto monitorando tutte le value 🔍")
 
-# Avvio del bot
+# Avvia il mini webserver per Render
+keep_alive()
+
+# Avvia il bot
 client = MyClient(intents=intents)
 client.run(TOKEN)
