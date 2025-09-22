@@ -19,7 +19,7 @@ class MyClient(discord.Client):
         self.bg_task = asyncio.create_task(self.check_updates())
 
     async def on_ready(self):
-        print(f"✅ Bot connesso come {self.user}")
+        print(f"✅ Bot connected as {self.user}")
 
     def fetch_all_values(self):
         """Scarica tutte le value da Rolimons"""
@@ -57,7 +57,7 @@ class MyClient(discord.Client):
                 for name, old, new, item_id in changes:
                     embed = discord.Embed(
                         title=f"🔄 {name}",
-                        description=f"**Value cambiato:** {old} ➡️ {new}",
+                        description=f"**Value changed:** {old} ➡️ {new}",
                         color=discord.Color.orange()
                     )
                     image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
@@ -72,8 +72,8 @@ class MyClient(discord.Client):
     async def on_message(self, message):
         if message.author == self.user:
             return
-        if message.content.lower() == "!ciao":
-            await message.channel.send("Ciao! Sto monitorando tutte le value 🔍")
+        if message.content.lower() == "!Hi":
+            await message.channel.send("Hi! I am monitoring all the values🔍")
 
 # Avvia il mini webserver per Render
 keep_alive()
@@ -81,3 +81,4 @@ keep_alive()
 # Avvia il bot
 client = MyClient(intents=intents)
 client.run(TOKEN)
+
