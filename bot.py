@@ -17,9 +17,6 @@ ASSET_TYPE_MAP = {
     8: "Hat",
     41: "Gear",
     42: "Face",
-    43: "T-Shirt",
-    44: "Shirt",
-    45: "Pants",
     50: "Back Accessory",
     51: "Front Accessory",
     52: "Hair Accessory",
@@ -40,6 +37,14 @@ def get_asset_type(item_id):
     except Exception as e:
         print(f"Error fetching asset type for {item_id}: {e}")
         return "Unknown"
+
+def image_exists(item_id):
+    url = f"https://www.rolimons.com/thumbs/{item_id}.png"
+    try:
+        response = requests.get(url)
+        return response.status_code == 200
+    except:
+        return False
 
 class MyClient(discord.Client):
     async def setup_hook(self):
@@ -80,7 +85,6 @@ class MyClient(discord.Client):
 
             for name, old, new, item_id in changes:
                 rolimons_link = f"https://www.rolimons.com/item/{item_id}"
-                image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
                 asset_type = get_asset_type(item_id)
 
                 if new > old:
@@ -103,9 +107,12 @@ class MyClient(discord.Client):
                     ),
                     color=color
                 )
-                embed.set_thumbnail(url=image_url)
-                await channel.send(embed=embed)
 
+                if image_exists(item_id):
+                    image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
+                    embed.set_thumbnail(url=image_url)
+
+                await channel.send(embed=embed)
                 print(f"📢 Sent update for {name}: {old} ➡️ {new}")
 
             last_values = current_values
@@ -119,6 +126,4 @@ class MyClient(discord.Client):
 keep_alive()
 client = MyClient(intents=intents)
 client.run(TOKEN)
-
-
 
