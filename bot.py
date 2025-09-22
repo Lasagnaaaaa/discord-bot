@@ -13,31 +13,6 @@ CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 intents = discord.Intents.default()
 intents.message_content = True
 
-ASSET_TYPE_MAP = {
-    8: "Hat",
-    41: "Gear",
-    42: "Face",
-    50: "Back Accessory",
-    51: "Front Accessory",
-    52: "Hair Accessory",
-    53: "Hat Accessory",
-    54: "Face Accessory",
-    55: "Neck Accessory",
-    56: "Shoulder Accessory",
-    57: "Waist Accessory"
-}
-
-def get_asset_type(item_id):
-    try:
-        url = f"https://api.roblox.com/marketplace/productinfo?assetId={item_id}"
-        response = requests.get(url)
-        data = response.json()
-        asset_type_id = data.get("AssetTypeId")
-        return ASSET_TYPE_MAP.get(asset_type_id, "Unknown")
-    except Exception as e:
-        print(f"Error fetching asset type for {item_id}: {e}")
-        return "Unknown"
-
 def image_exists(item_id):
     url = f"https://www.rolimons.com/thumbs/{item_id}.png"
     try:
@@ -85,7 +60,6 @@ class MyClient(discord.Client):
 
             for name, old, new, item_id in changes:
                 rolimons_link = f"https://www.rolimons.com/item/{item_id}"
-                asset_type = get_asset_type(item_id)
 
                 if new > old:
                     direction = "📈 Increased"
@@ -102,7 +76,6 @@ class MyClient(discord.Client):
                     description=(
                         f"**Value:** {old} ➡️ {new}\n"
                         f"**Change:** {direction}\n"
-                        f"**Type:** {asset_type}\n"
                         f"[View on Rolimons]({rolimons_link})"
                     ),
                     color=color
@@ -126,4 +99,5 @@ class MyClient(discord.Client):
 keep_alive()
 client = MyClient(intents=intents)
 client.run(TOKEN)
+
 
