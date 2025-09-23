@@ -2,6 +2,7 @@ import discord
 import requests
 import asyncio
 import os
+import datetime
 from dotenv import load_dotenv
 from keep_alive import keep_alive
 
@@ -60,6 +61,7 @@ class MyClient(discord.Client):
 
             for name, old, new, item_id in changes:
                 rolimons_link = f"https://www.rolimons.com/item/{item_id}"
+                image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
 
                 if new > old:
                     direction = "📈 Increased"
@@ -72,17 +74,16 @@ class MyClient(discord.Client):
                     color = discord.Color.orange()
 
                 embed = discord.Embed(
-                    title=f"{name}",
-                    description=(
-                        f"**Value:** {old} ➡️ {new}\n"
-                        f"**Change:** {direction}\n"
-                        f"[View on Rolimons]({rolimons_link})"
-                    ),
-                    color=color
+                    title=name,
+                    color=color,
+                    timestamp=datetime.datetime.utcnow()
                 )
+                embed.add_field(name="Value", value=f"{old} ➡️ {new}", inline=True)
+                embed.add_field(name="Change", value=direction, inline=True)
+                embed.add_field(name="Link", value=f"[View on Rolimons]({rolimons_link})", inline=False)
+                embed.set_footer(text="Value Bot • Rolimons Tracker")
 
                 if image_exists(item_id):
-                    image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
                     embed.set_thumbnail(url=image_url)
 
                 await channel.send(embed=embed)
@@ -99,5 +100,7 @@ class MyClient(discord.Client):
 keep_alive()
 client = MyClient(intents=intents)
 client.run(TOKEN)
+
+
 
 
