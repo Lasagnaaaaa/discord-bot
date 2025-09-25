@@ -14,13 +14,14 @@ CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 intents = discord.Intents.default()
 intents.message_content = True
 
-def image_exists(item_id):
-    url = f"https://www.rolimons.com/thumbs/{item_id}.png"
-    try:
-        response = requests.get(url)
-        return response.status_code == 200
-    except:
-        return False
+def demand_to_text(demand_level):
+    demand_map = {
+        0: "⚪ Unknown",
+        1: "🔴 Low",
+        2: "🟡 Normal",
+        3: "🟢 High"
+    }
+    return demand_map.get(demand_level, "⚪ Unknown")
 
 class MyClient(discord.Client):
     async def setup_hook(self):
@@ -37,8 +38,10 @@ class MyClient(discord.Client):
         for item_id, details in data["items"].items():
             name = details[0]
             value = details[3]
+            demand = details[4]
             items[name] = {
                 "value": value,
+                "demand": demand,
                 "id": item_id
             }
         return items
@@ -57,11 +60,12 @@ class MyClient(discord.Client):
             for name, data in current_values.items():
                 old_data = last_values.get(name)
                 if old_data and old_data["value"] != data["value"]:
-                    changes.append((name, old_data["value"], data["value"], data["id"]))
+                    changes.append((name, old_data["value"], data["value"], data["demand"], data["id"]))
 
-            for name, old, new, item_id in changes:
+            for name, old, new, demand, item_id in changes:
                 rolimons_link = f"https://www.rolimons.com/item/{item_id}"
-                image_url = f"https://www.rolimons.com/thumbs/{item_id}.png"
+                image_url = f"https://www.roblox.com/thumbs?assetId={item_id}&type=Asset&width=420&height=420"
+                demand_text = demand_to_text(demand)
 
                 if new > old:
                     direction = "📈 Increased"
@@ -80,14 +84,13 @@ class MyClient(discord.Client):
                 )
                 embed.add_field(name="Value", value=f"{old} ➡️ {new}", inline=True)
                 embed.add_field(name="Change", value=direction, inline=True)
+                embed.add_field(name="Demand", value=demand_text, inline=True)
                 embed.add_field(name="Link", value=f"[View on Rolimons]({rolimons_link})", inline=False)
+                embed.set_thumbnail(url=image_url)
                 embed.set_footer(text="Value Bot • Rolimons Tracker")
 
-                if image_exists(item_id):
-                    embed.set_thumbnail(url=image_url)
-
                 await channel.send(embed=embed)
-                print(f"📢 Sent update for {name}: {old} ➡️ {new}")
+                print(f"📢 Sent update for {name}: {old} ➡️ {new} | Demand: {demand_text}")
 
             last_values = current_values
 
@@ -100,7 +103,3 @@ class MyClient(discord.Client):
 keep_alive()
 client = MyClient(intents=intents)
 client.run(TOKEN)
-
-
-
-
